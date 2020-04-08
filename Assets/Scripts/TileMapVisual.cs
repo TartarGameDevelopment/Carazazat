@@ -30,6 +30,7 @@ public class TileMapVisual : MonoBehaviour
                 int index = x * grid.GetHeight() + y;
 
                 Vector3 QuadSize = new Vector3(1, 1) * grid.GetCellSize();
+                //Vector3 QuadSize = Vector3.zero;
 
                 MeshUtils.AddToMeshArrays(vertices, uv, triangles, index, grid.GetWorldPosition(x, y) + QuadSize * .5f, 0f, QuadSize, Vector2.zero, new Vector2(1,1));
 

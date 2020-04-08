@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Pathfinding 
+public class Pathfinding
 {
     private Grid<PathNode> grid;
     private Grid<Terrain> map;
@@ -24,12 +24,30 @@ public class Pathfinding
         return grid;
     }
 
+    public void ResestPath()
+    {
+        openList = new List<PathNode>();
+        closedList = new List<PathNode>();
+        for (int x = 0; x < grid.GetWidth(); x++)
+        {
+            for (int y = 0; y < grid.GetHeight(); y++)
+            {
+                PathNode pathNode = grid.GetGridObject(x, y);
+                pathNode.gCost = int.MaxValue;
+                pathNode.hCost = 0;
+                pathNode.calculateFCost();
+                pathNode.cameFromNode = null;
+                grid.TriggerGridObjectChanged(x, y);
+            }
+        }
+    }
 
     public List<PathNode> FindArea(Vector3 startWorldPosition, int maxCost)
     {
         grid.getXY(startWorldPosition, out int startX, out int startY);
         return FindArea(startX, startY, maxCost);
     }
+
 
     public List<PathNode> FindArea(int startX, int startY, int maxCost)
     {
@@ -67,7 +85,7 @@ public class Pathfinding
                 if (closedList.Contains(neighbourNode)) continue;
 
                 int tentativeGCost = currentNode.gCost + CalculateDistanceCost(currentNode, neighbourNode) * map.GetGridObject(neighbourNode.GetX(), neighbourNode.GetY()).GetCost();
-                if (tentativeGCost < neighbourNode.gCost)
+                if (tentativeGCost < neighbourNode.gCost && neighbourNode.walkable)
                 {
                     neighbourNode.cameFromNode = currentNode;
                     neighbourNode.gCost = tentativeGCost;
@@ -75,7 +93,7 @@ public class Pathfinding
                     neighbourNode.calculateFCost();
 
                     if (!openList.Contains(neighbourNode) && neighbourNode.gCost <= maxCost)
-                    {                     
+                    {
                         openList.Add(neighbourNode);
                     }
                 }
@@ -112,7 +130,7 @@ public class Pathfinding
     {
         PathNode endNode = grid.GetGridObject(endX, endY);
 
-        if(closedList.Contains(endNode))
+        if (closedList.Contains(endNode))
             return CalculatePath(endNode);
         else
             return null;
@@ -127,7 +145,7 @@ public class Pathfinding
             neighbourList.Add(GetNode(currentNode.GetX() + 1, currentNode.GetY()));
         if (currentNode.GetY() - 1 >= 0)
             neighbourList.Add(GetNode(currentNode.GetX(), currentNode.GetY() - 1));
-        
+
         if (currentNode.GetY() + 1 < grid.GetHeight())
             neighbourList.Add(GetNode(currentNode.GetX(), currentNode.GetY() + 1));
         return neighbourList;
@@ -176,4 +194,9 @@ public class Pathfinding
         }
         return lowestCostNode;
     }
+
+    public List<PathNode> GetAvalibleNodes()
+        {
+        return closedList;
+        }
 }
